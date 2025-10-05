@@ -5,6 +5,12 @@ from map import LEVEL, is_wall, has_dot, eat_dot
 from player import Player
 from ghost import Ghost
 from random_generators import LCG, MiddleSquare, XorShift32
+import pygame.mixer
+
+pygame.mixer.init()
+eat_sound = pygame.mixer.Sound("sounds/eat.mp3")
+
+game_over_sound = pygame.mixer.Sound("sounds/game_over.mp3")
 
 def build_walls(level):
     walls = []
@@ -91,6 +97,8 @@ def main():
         # comer puntos
         pc, pr = tile_at(player.rect.centerx, player.rect.centery)
         if eat_dot(level, pc, pr):
+            if not pygame.mixer.get_busy():  # solo si no hay otro sonido en curso
+                eat_sound.play()            
             score += DOT_SCORE
 
         # colisión con fantasma
@@ -100,6 +108,8 @@ def main():
             player.rect.center = (TILE_SIZE*12 + TILE_SIZE//2, TILE_SIZE*19)
             ghost.rect.center  = (TILE_SIZE*12 + TILE_SIZE//2, TILE_SIZE*9)
             if lives <= 0:
+                game_over_sound.play()
+                pygame.time.delay(2000)  # Espera 2 segundos antes de cerrar
                 running = False
 
         # draw
